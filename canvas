@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>루니의 갯벌 정화 작전</title>
+  <style>
+    canvas { background: #aee0f9; display: block; margin: 0 auto; }
+    body { text-align: center; font-family: sans-serif; }
+  </style>
+</head>
+<body>
+  <h1>🧹 루니의 갯벌 정화 작전</h1>
+  <canvas id="gameCanvas" width="500" height="500"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const player = { x: 250, y: 250, size: 20, color: "brown" };
+    const trash = [];
+    const totalTrash = 5;
+
+    for (let i = 0; i < totalTrash; i++) {
+      trash.push({
+        x: Math.random() * 480,
+        y: Math.random() * 480,
+        size: 15,
+        collected: false
+      });
+    }
+
+    let collectedCount = 0;
+
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawTrash() {
+      trash.forEach(t => {
+        if (!t.collected) {
+          ctx.fillStyle = "gray";
+          ctx.beginPath();
+          ctx.rect(t.x, t.y, t.size, t.size);
+          ctx.fill();
+        }
+      });
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlayer();
+      drawTrash();
+
+      trash.forEach(t => {
+        if (!t.collected) {
+          const dx = player.x - t.x;
+          const dy = player.y - t.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < player.size + t.size) {
+            t.collected = true;
+            collectedCount++;
+          }
+        }
+      });
+
+      if (collectedCount === totalTrash) {
+        ctx.fillStyle = "green";
+        ctx.font = "24px sans-serif";
+        ctx.fillText("정화 완료! 🎉", 170, 250);
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const speed = 10;
+      if (e.key === "ArrowUp") player.y -= speed;
+      else if (e.key === "ArrowDown") player.y += speed;
+      else if (e.key === "ArrowLeft") player.x -= speed;
+      else if (e.key === "ArrowRight") player.x += speed;
+    });
+
+    function gameLoop() {
+      update();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
